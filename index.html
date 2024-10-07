@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack the Scientist</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://api.fontshare.com/v2/css?f[]=comico@400&display=swap" rel="stylesheet"> 
+</head>
+<body>
+    <h1>Whack the Scientist!</h1>
+    <div class="timer-board">Time Left: <span id="timer">120</span> seconds</div>
+    <div class="game-board">
+        <div class="hole" id="hole1"><div class="Scientist" id="Scientist1"></div></div>
+        <div class="hole" id="hole2"><div class="Scientist" id="Scientist2"></div></div>
+        <div class="hole" id="hole3"><div class="Scientist" id="Scientist3"></div></div>
+        <div class="hole" id="hole4"><div class="Scientist" id="Scientist4"></div></div>
+        <div class="hole" id="hole5"><div class="Scientist" id="Scientist5"></div></div>
+        <div class="hole" id="hole6"><div class="Scientist" id="Scientist6"></div></div>
+        <div class="hole" id="hole7"><div class="Scientist" id="Scientist7"></div></div>
+        <div class="hole" id="hole8"><div class="Scientist" id="Scientist8"></div></div>
+        <div class="hole" id="hole9"><div class="Scientist" id="Scientist9"></div></div>
+        <div class="hole" id="hole10"><div class="Scientist" id="Scientist10"></div></div>
+        <div class="hole" id="hole11"><div class="Scientist" id="Scientist11"></div></div>
+        <div class="hole" id="hole12"><div class="Scientist" id="Scientist12"></div></div>
+    </div>
+    <div class="score-board">Score: <span id="score">0</span></div>
+    <button onclick="startGame()">Start Game</button>
+    <script src="script.js"></script>
+</body>
+</html>
+
