@@ -4,29 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whack the Scientist</title>
-    <link rel="stylesheet" href="style.css">
     <link href="https://api.fontshare.com/v2/css?f[]=comico@400&display=swap" rel="stylesheet"> 
 </head>
+<style>
+    :root {
+        --primary-color: #ff4757;
+        --secondary-color: #2f3542;
+        --background-color: #070707;
+        --accent-color: #1e90ff;
+        --hole-size: min(22vw, 100px);
+    }
+    body {
+        font-family: 'Comico', cursive;
+        text-align: center;
+        background-color: var(--background-color);
+        color: var(--primary-color);
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 0 20px;
+    }
+    h1 {
+        font-size: 10vmin;
+        margin-bottom: 10px;
+        color: red;
+    }
+    .board {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .timer-board, .score-board, .best-score-board {
+        background-color: rgb(50, 52, 50);
+        padding: 5px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        font-size: 3vmin;
+        color: rgb(251, 251, 251);
+    }
+    .game-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(var(--hole-size), 1fr));
+        gap: 15px;
+        justify-content: center;
+        max-width: 500px;
+        margin: 20px auto;
+    }
+    .hole {
+        width: var(--hole-size);
+        height: var(--hole-size);
+        background-color: var(--secondary-color);
+        border-radius: 50%;
+        position: relative;
+        overflow: hidden;
+        box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
+    }
+    .Scientist {
+        width: var(--hole-size);
+        height: var(--hole-size);
+        background-image: url('https://w7.pngwing.com/pngs/461/47/png-transparent-cartoon-old-professor.png');
+        background-size: cover;
+        background-position: center;
+        position: absolute;
+        bottom: calc(var(--hole-size) * -1);
+        left: 10%;
+        transition: bottom 0.3s ease-out;
+    }
+    .Scientist.up {
+        bottom: 0;
+    }
+    button {
+        font-family: 'Comico', cursive;
+        margin-top: 20px;
+        padding: 5px;
+        font-size: 3vmin;
+        cursor: pointer;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    button:hover {
+        background-color: #0077cc;
+    }
+    @media (max-width: 480px) {
+        .game-board {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+
 <body>
     <h1>Whack the Scientist!</h1>
-    <div class="timer-board">Time Left: <span id="timer">120</span> seconds</div>
-    <div class="game-board">
-        <div class="hole" id="hole1"><div class="Scientist" id="Scientist1"></div></div>
-        <div class="hole" id="hole2"><div class="Scientist" id="Scientist2"></div></div>
-        <div class="hole" id="hole3"><div class="Scientist" id="Scientist3"></div></div>
-        <div class="hole" id="hole4"><div class="Scientist" id="Scientist4"></div></div>
-        <div class="hole" id="hole5"><div class="Scientist" id="Scientist5"></div></div>
-        <div class="hole" id="hole6"><div class="Scientist" id="Scientist6"></div></div>
-        <div class="hole" id="hole7"><div class="Scientist" id="Scientist7"></div></div>
-        <div class="hole" id="hole8"><div class="Scientist" id="Scientist8"></div></div>
-        <div class="hole" id="hole9"><div class="Scientist" id="Scientist9"></div></div>
-        <div class="hole" id="hole10"><div class="Scientist" id="Scientist10"></div></div>
-        <div class="hole" id="hole11"><div class="Scientist" id="Scientist11"></div></div>
-        <div class="hole" id="hole12"><div class="Scientist" id="Scientist12"></div></div>
+    <div class="board">
+        <div class="timer-board">Time Left: <span id="timer">30</span> seconds</div>
+        <div class="score-board">Score: <span id="score">0</span></div>
+        <div class="best-score-board">Best Score: <span id="best-score">0</span></div>
     </div>
-    <div class="score-board">Score: <span id="score">0</span></div>
+    <div class="game-board">
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+        <div class="hole"><div class="Scientist"></div></div>
+    </div>
     <button onclick="startGame()">Start Game</button>
-    <script src="script.js"></script>
+    <script>
+        let score = 0;
+        let best = localStorage.getItem('best') || 0;
+        let lasthole;
+        let timeup = false;
+        let timelft = 30;
+        let timeintrvl;
+        document.getElementById('best-score').textContent = best;
+        function rndtime(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+        function rndhole(holes) {
+            const idx = Math.floor(Math.random() * holes.length);
+            const hole = holes[idx];
+            if (hole === lasthole) return rndhole(holes);
+            lasthole = hole;
+            return hole;
+        }
+        function showscient() {
+            const holes = document.querySelectorAll('.hole');
+            const time = rndtime(300, 1000 - (30 - timelft) * 25);
+            const hole = rndhole(holes);
+            const Scientist = hole.querySelector('.Scientist');
+            Scientist.classList.add('up');
+            setTimeout(() => { Scientist.classList.remove('up'); if (!timeup) showscient(); }, time);
+        }
+        function startGame() {
+            score = 0;
+            timelft = 30;
+            document.getElementById('score').textContent = score;
+            document.getElementById('timer').textContent = timelft;
+            timeup = false;
+            clearInterval(timeintrvl);
+            timeintrvl = setInterval(updateTimer, 1000);
+            showscient();
+            setTimeout(() => {
+                timeup = true;
+                clearInterval(timeintrvl);
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem('best', best);
+                    document.getElementById('best-score').textContent = best;
+                }
+            }, 30000);
+        }
+        function updateTimer() {
+            timelft--;
+            document.getElementById('timer').textContent = timelft;
+            if (timelft <= 0) clearInterval(timeintrvl);
+        }
+        function whack(e) {
+            if (!e.isTrusted) return; 
+            score++;
+            this.classList.remove('up');
+            document.getElementById('score').textContent = score;
+        }
+        document.querySelectorAll('.Scientist').forEach(Scientist => {
+            Scientist.addEventListener('click', whack);
+        });
+    </script>
 </body>
 </html>
-
